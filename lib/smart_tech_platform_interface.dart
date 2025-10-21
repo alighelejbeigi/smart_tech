@@ -26,4 +26,8 @@ abstract class SmartTechPlatform extends PlatformInterface {
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
+
+  Future<Map<String, int>?> getNativeData() {
+    throw UnimplementedError('getNativeData() has not been implemented.');
+  }
 }

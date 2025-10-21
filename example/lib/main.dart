@@ -1,62 +1,132 @@
-import 'package:flutter/material.dart';
-import 'dart:async';
+// example/lib/main.dart
 
-import 'package:flutter/services.dart';
-import 'package:smart_tech/smart_tech.dart';
+import 'package:flutter/material.dart';
+import 'package:smart_tech/smart_tech.dart'; // import پکیج شما
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  final _smartTechPlugin = SmartTech();
-
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await _smartTechPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
+      title: 'Smart Tech Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      ),
+      home: const SmartTechDemo(),
+    );
+  }
+}
+
+class SmartTechDemo extends StatefulWidget {
+  const SmartTechDemo({super.key});
+
+  @override
+  State<SmartTechDemo> createState() => _SmartTechDemoState();
+}
+
+class _SmartTechDemoState extends State<SmartTechDemo> {
+  final _smartTechPlugin = SmartTech(); // ساخت یک instance از کلاس پلاگین
+  int? _randomNumber;
+  int? _fixedValue;
+  String _statusMessage = 'Press the button to load native data.';
+
+  Future<void> _loadNativeData() async {
+    setState(() {
+      _statusMessage = 'Loading data...';
+      _randomNumber = null;
+      _fixedValue = null;
+    });
+
+    try {
+      // فراخوانی متد جدید
+      final data = await _smartTechPlugin.getNativeData();
+
+      if (data != null) {
+        setState(() {
+          _randomNumber = data['randomNumber'];
+          _fixedValue = data['fixedValue'];
+          _statusMessage = 'Data loaded successfully!';
+        });
+      } else {
+        setState(() {
+          _statusMessage = 'Error: Received null data.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _statusMessage = 'ERROR: $e';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Method Channel Demo'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              _statusMessage,
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+
+            // نمایش مقدار رندوم
+            if (_randomNumber != null) ...[
+              const Text(
+                'Random Value from Native:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '$_randomNumber',
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineMedium?.copyWith(color: Colors.blue),
+              ),
+            ],
+
+            const SizedBox(height: 20),
+
+            // نمایش مقدار ثابت
+            if (_fixedValue != null) ...[
+              const Text(
+                'Fixed Value (100) from Native:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '$_fixedValue',
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineMedium?.copyWith(color: Colors.green),
+              ),
+            ],
+
+            // نمایش لودینگ
+            if (_randomNumber == null && _statusMessage == 'Loading data...')
+              const Padding(
+                padding: EdgeInsets.only(top: 20),
+                child: CircularProgressIndicator(),
+              ),
+
+            const SizedBox(height: 50),
+          ],
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _loadNativeData,
+        tooltip: 'Get Native Data',
+        child: const Icon(Icons.refresh),
       ),
     );
   }
