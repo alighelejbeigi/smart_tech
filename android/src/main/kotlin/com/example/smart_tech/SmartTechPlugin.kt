@@ -1,60 +1,51 @@
 package com.example.smart_tech
 
+import androidx.annotation.NonNull // برای پارامترهای @NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler // نگه داشتن این برای پیاده‌سازی اینترفیس
 import kotlin.random.Random
+// <--- خطوط import تکراری (مثل .Result) حذف شدند --->
 
 /** SmartTechPlugin */
 class SmartTechPlugin: FlutterPlugin, MethodCallHandler {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
+
   private lateinit var channel : MethodChannel
 
-  override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "smart_tech")
+    // ارجاع به کلاس فعلی (This) که MethodCallHandler را پیاده‌سازی می‌کند
     channel.setMethodCallHandler(this)
   }
 
-  override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
-    }
-  }
-
-  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
-  }
-
+  // <--- متد onMethodCall اصلی و واحد (متد تکراری حذف شد) --->
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
+    when (call.method) {
+      "getPlatformVersion" -> {
+        // متد اول: نمایش نسخه اندروید
+        result.success("Android ${android.os.Build.VERSION.RELEASE}")
+      }
+      "get_random_and_fixed" -> {
+        // متد دوم: منطق تولید دو عدد
+        val randomNumber = Random.nextInt(1, 1000)
+        val fixedValue = 100
 
-    } else if (call.method == "get_random_and_fixed") { // هندل کردن متد جدید
+        val data = mapOf(
+          "randomNumber" to randomNumber,
+          "fixedValue" to fixedValue
+        )
 
-      // ۱. تولید داده تصادفی
-      val randomNumber = Random.nextInt(1, 1000) // تولید عدد بین ۱ تا ۱۰۰۰
-
-      // ۲. تعریف مقدار دقیق (ثابت)
-      val fixedValue = 100
-
-      // ۳. ساخت Map برای ارسال به Flutter
-      val data = mapOf(
-        "randomNumber" to randomNumber,
-        "fixedValue" to fixedValue
-      )
-
-      // ارسال موفقیت‌آمیز نتیجه (Map) به Flutter
-      result.success(data)
-
-    } else {
-      result.notImplemented()
+        result.success(data)
+      }
+      else -> {
+        // اگر متد ناشناخته بود
+        result.notImplemented()
+      }
     }
+  }
+
+  override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    channel.setMethodCallHandler(null)
   }
 }
