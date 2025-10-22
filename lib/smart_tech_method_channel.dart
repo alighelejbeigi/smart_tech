@@ -20,13 +20,11 @@ class MethodChannelSmartTech extends SmartTechPlatform {
   @override
   Future<Map<String, int>?> getNativeData() async {
     try {
-      // فراخوانی متد مورد نظر در Native
       final Map<dynamic, dynamic>? result = await methodChannel.invokeMethod(
         'get_random_and_fixed',
       );
 
       if (result != null) {
-        // تبدیل Map دریافتی به فرمت مورد انتظار
         return {
           'randomNumber': result['randomNumber'] as int,
           'fixedValue': result['fixedValue'] as int,
@@ -34,7 +32,6 @@ class MethodChannelSmartTech extends SmartTechPlatform {
       }
       return null;
     } on PlatformException catch (e) {
-      // مدیریت خطا (مثل MissingPluginException)
       debugPrint("Failed to get data from native: ${e.message}");
       rethrow;
     }
