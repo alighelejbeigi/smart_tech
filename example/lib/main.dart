@@ -25,6 +25,150 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class DataDisplayCard extends StatelessWidget {
+  final DataController controller;
+
+  const DataDisplayCard({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          children: [
+            const Text(
+              'مقدار دریافتی از Native:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Obx(() {
+              if (controller.isLoading.value) {
+                return const CircularProgressIndicator();
+              } else {
+                return Text(
+                  controller.displayValue.value,
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    color:
+                        controller.displayValue.value == 'Ready' ||
+                                controller.displayValue.value == 'ERROR'
+                            ? Colors.grey
+                            : Colors.deepPurple,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              }
+            }),
+            const SizedBox(height: 10),
+            Obx(
+              () => Text(
+                controller.statusMessage.value,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ActionButtonsRow extends StatelessWidget {
+  final DataController controller;
+
+  const ActionButtonsRow({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed:
+                  controller.isLoading.value ? null : controller.loadRandomData,
+              icon: const Icon(Icons.casino_outlined),
+              label: const Text('دریافت عدد تصادفی'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                backgroundColor: Colors.blue.shade600,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed:
+                  controller.isLoading.value ? null : controller.loadFixedData,
+              icon: const Icon(Icons.lock_open),
+              label: const Text('دریافت عدد ثابت (۱۰۰)'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                backgroundColor: Colors.green.shade600,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RebuildCounterBox extends StatelessWidget {
+  final DataController controller;
+
+  const RebuildCounterBox({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.red.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.red.shade200),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'تعداد به‌روزرسانی حالت:',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.red.shade800,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Obx(
+              () => Text(
+                controller.rebuildCount.value.toString(),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: Colors.red.shade900,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class SmartTechDemo extends StatefulWidget {
   const SmartTechDemo({super.key});
 
@@ -57,161 +201,31 @@ class _SmartTechDemoState extends State<SmartTechDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Native Data Reader Demo (GetX)'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Card(
-                elevation: 4,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'مقدار دریافتی از Native:',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Obx(() {
-                        if (controller.isLoading.value) {
-                          return const CircularProgressIndicator();
-                        } else {
-                          return Text(
-                            controller.displayValue.value,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.headlineLarge?.copyWith(
-                              color:
-                                  controller.displayValue.value == 'Ready' ||
-                                          controller.displayValue.value ==
-                                              'ERROR'
-                                      ? Colors.grey
-                                      : Colors.deepPurple,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          );
-                        }
-                      }),
-                      const SizedBox(height: 10),
-                      Obx(
-                        () => Text(
-                          controller.statusMessage.value,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: const Text('Native Data Reader Demo (GetX)'),
+      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      centerTitle: true,
+    ),
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            DataDisplayCard(controller: controller),
 
-              const SizedBox(height: 30),
+            const SizedBox(height: 30),
 
-              Obx(
-                () => Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed:
-                            controller.isLoading.value
-                                ? null
-                                : controller.loadRandomData,
-                        icon: const Icon(Icons.casino_outlined),
-                        label: const Text('دریافت عدد تصادفی'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          backgroundColor: Colors.blue.shade600,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed:
-                            controller.isLoading.value
-                                ? null
-                                : controller.loadFixedData,
-                        icon: const Icon(Icons.lock_open),
-                        label: const Text('دریافت عدد ثابت (۱۰۰)'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          backgroundColor: Colors.green.shade600,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            ActionButtonsRow(controller: controller),
 
-              const SizedBox(height: 40),
+            const SizedBox(height: 40),
 
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.shade200),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'تعداد به‌روزرسانی حالت:',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.red.shade800,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Obx(
-                        () => Text(
-                          controller.rebuildCount.value.toString(),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineMedium?.copyWith(
-                            color: Colors.red.shade900,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+            RebuildCounterBox(controller: controller),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }

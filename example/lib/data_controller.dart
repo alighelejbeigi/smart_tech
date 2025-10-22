@@ -13,7 +13,6 @@ class DataController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
     rebuildCount.value = 1;
   }
 
